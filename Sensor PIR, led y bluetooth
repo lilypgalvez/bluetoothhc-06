@@ -1,0 +1,47 @@
+#include <SoftwareSerial.h>
+
+//Configuaración de Módulo bluetooth HC06
+SoftwareSerial  bluetooth (0,1); //RX y TX
+
+const int PirPin = 3;  //Sensor Pir
+const int ledPin = 5; //Pin del LED
+
+void setup(){
+  pinMode(PirPin, INPUT);  // Configura el pin del sensor PIR como entrada
+  pinMode (ledPin, OUTPUT);  // Configura el pin del LED como salida
+  Serial.begin(9600);   // Inicializa la comunicación serial
+  bluetooth.begin(9600);  // Inicializa la comunicación Bluetooth
+}
+
+void loop() {
+  // Lee el estado del sensor PIR
+  int pirStatus = digitalRead(PirPin);
+
+  if (pirStatus == HIGH) {
+    digitalWrite(ledPin, HIGH);  // Enciende el LED si se detecta movimiento
+    bluetooth.write('1');        // Envía el comando '1' al módulo Bluetooth
+    Serial.println("Movimiento detectado");
+    delay(5000);
+  } else {
+    digitalWrite(ledPin, LOW);   // Apaga el LED si no se detecta movimiento
+    bluetooth.write('0');        // Envía el comando '0' al módulo Bluetooth
+    Serial.println("Sin movimiento");
+    delay(2000);
+  }
+
+  // Lee los comandos recibidos a través del módulo Bluetooth
+  while (bluetooth.available()) {
+    char command = bluetooth.read();
+
+    // Ejemplo de acciones basadas en los comandos recibidos
+    if (command == '1') {
+      digitalWrite(ledPin, HIGH);    // Enciende el LED
+      Serial.println("Comando recibido: Encender LED");
+      
+    } else if (command == '0') {
+      digitalWrite(ledPin, LOW);     // Apaga el LED
+      Serial.println("Comando recibido: Apagar LED");
+     
+    }
+  }
+}
